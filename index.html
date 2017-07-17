@@ -109,10 +109,10 @@
       </div>
       <h1 id="char-text" class="character-text">Choose your character!</h1>
       <div id="player" class="player"></div>
-      <button id="atkBtn" class="atkBtn">Attack!</button>
+      <button id="atkBtn" class="atkBtn btn btn-primary">Attack!</button>
       <div id="enemy" class="enemy"></div>
       <div id="combat-text" class="combat-text"></div>
-      <button id="playBtn" class="playBtn">Play Again!</button>
+      <button id="playBtn" class="playBtn btn btn-danger">Play Again!</button>
     </div>
 
     <script type="text/javascript">
@@ -138,10 +138,10 @@
 
         // Initialize character objects
         var char = {
-          'obiwan': new createChar('obiwan', 300, 15),
+          'obiwan': new createChar('obiwan', 320, 18),
           'yoda': new createChar('yoda', 260, 25),
-          'vader': new createChar('vader', 240,20),
-          'maul': new createChar('maul',220,30)
+          'vader': new createChar('vader', 300,20),
+          'maul': new createChar('maul',240,30)
         };
 
         //Add hp to Character elements
