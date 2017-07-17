@@ -197,14 +197,14 @@
           }
           else if (hero.hp <= 0){
             $('#player').empty();
-            text.html(upCase(enemy.name) + ' defeated the ' + upCase(hero.name) + '. You Lost!<br>Click button below to play again!');
+            text.html(upCase(enemy.name) + ' has defeated ' + upCase(hero.name) + '. You Lost!<br>Click button below to play again!');
             atkBtn.hide();
             playBtn.show();
           }
           else if (enemy.hp <= 0){
             $("." + hero.name + " > .hp").html(hero.hp);
             $('#enemy').empty();
-            text.html(upCase(hero.name) + ' defeated the ' + upCase(enemy.name) + '. <br>Select a new enemy!');
+            text.html(upCase(hero.name) + ' has defeated ' + upCase(enemy.name) + '. <br>Select a new enemy!');
             enemy = undefined;
           }
           if(count === 0 && enemy === undefined){
