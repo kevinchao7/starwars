@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Starwars game</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style type="text/css">
+      html body{
+        background:url("background.jpg") no-repeat center center fixed;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+      }
+      .jumbotron{
+        max-width:75%;
+        background-color:rgba(0,0,0,0.15);
+      }
+      h1{
+        font-size:32px !important;
+        text-align:center;
+        color:yellow;
+        -webkit-text-fill-color: black;
+        -webkit-text-stroke-width: 1px;
+        -webkit-text-stroke-color: yellow;'
+        font-family:"ITC Serif Gothic";
+      }
+      .characters{
+        margin-top:20px;
+        text-align:center;
+      }
+      .char{
+        width:200px;
+        height:185px;
+        background-color:white;
+        border:3px solid #95f442;
+        padding:0 25px;
+        display:inline-block;
+      }
+      .char img{
+        width:150px;
+        height:125px;
+        margin:auto;
+      }
+      p{
+        text-align:center;
+        margin-bottom:0 !important;
+      }
+      .logo{
+        margin:auto;
+      }
+      .logo img{
+        width:400px;
+        height:150px;
+        margin:auto;
+        display:block;
+      }
+      .player, .enemy{
+        margin:auto;
+        display:block;
+        text-align:center;
+      }
+      .redBorder{
+        border:3px solid red !important;
+      }
+      .atkBtn, .playBtn{
+        margin:15px auto;
+        display:block;
+      }
+      .combat-text{
+        color:yellow;
+        text-align:center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid jumbotron">
+      <div class="logo">
+        <img src="starwars-logo.png" alt="logo">
+      </div>
+
+      <div id="charEl" class="characters">
+
+        <div class="char obiwan" id="Obiwan">
+          <p>Obi-Wan</p>
+          <img src="obiwan.jpg" alt="obiwan">
+          <p class="hp"></p>
+        </div>
+
+        <div class="char yoda" id='Yoda'>
+          <p>Yoda</p>
+          <img src="yoda.jpg" alt="yoda">
+          <p class="hp"></p>
+        </div>
+
+        <div class="char vader" id='Vader'>
+          <p>Darth Vader</p>
+          <img src="vader.jpg" alt="vader">
+          <p class="hp"></p>
+        </div>
+
+        <div class="char maul" id='Maul'>
+          <p>Darth Maul</p>
+          <img src="maul.jpg" alt="maul">
+          <p class="hp"></p>
+        </div>
+
+      </div>
+      <h1 id="char-text" class="character-text">Choose your character!</h1>
+      <div id="player" class="player"></div>
+      <button id="atkBtn" class="atkBtn">Attack!</button>
+      <div id="enemy" class="enemy"></div>
+      <div id="combat-text" class="combat-text"></div>
+      <button id="playBtn" class="playBtn">Play Again!</button>
+    </div>
+
+    <script type="text/javascript">
+      $(document).ready(function(){
+
+        var hero = undefined;
+        var enemy = undefined;
+        var atkCount = 1;
+        var atkBtn = $("#atkBtn");
+        var playBtn = $('#playBtn');
+        atkBtn.hide(); // Initially hide attack button
+        playBtn.hide();
+        var count = $('#charEl').children().length; // Chracters left in CharEl div
+
+        // Audio
+        myAudio = new Audio('https://s.cdpn.io/1202/Star_Wars_original_opening_crawl_1977.mp3');
+        myAudio.currentTime = 8;
+        myAudio.addEventListener('ended', function() {
+          this.currentTime = 8;
+          this.play();
+        }, false);
+        myAudio.play();
+
+        // Initialize character objects
+        var char = {
+          'obiwan': new createChar('obiwan', 300, 15),
+          'yoda': new createChar('yoda', 260, 25),
+          'vader': new createChar('vader', 240,20),
+          'maul': new createChar('maul',220,30)
+        };
+
+        //Add hp to Character elements
+        addHpContent();
+
+        // Selecting hero and enemy
+        $("#charEl > .char").on("click", function(){
+
+          if (!hero){
+            atkBtn.show();
+            $("#player").append(this);
+            $("#char-text").html("Your Character is: " + this.id);
+            hero = char[this.id.toLowerCase()];
+            $('.' + this.id.toLowerCase()).addClass("hero");
+            count--;
+            redBorderEnemies(); // adds red border to all enemies
+          }
+          else if (!enemy && !$(this).hasClass('hero')){ // Checks if enemy DNE && not a hero
+            $('#enemy').append(this);
+            enemy = char[this.id.toLowerCase()];
+            $('#enemy > .char').removeClass("redBorder");
+            count--;
+
+            $('#combat-text').html("<p>Begin Combat!</p>");
+
+            // Scrolls page slowly to bottom when combat begins
+            $("html, body").animate({ scrollTop: $(document).height() }, "slow");
+          }
+
+        });
+
+        // // Attack button function
+        atkBtn.on("click",function(){
+          if (hero && enemy){
+            hero.takeDamage(enemy.maxAtk);
+            enemy.takeDamage(hero.playerAtk);
+            hero.playerAtk+=hero.increaseAtk;
+            updateStats();
+          }
+        });
+
+        playBtn.on("click",function(){
+          location.reload();
+        });
+
+        function updateStats(){
+          var text = $('<p>');
+          if (enemy.hp > 0 && hero.hp > 0){
+            $("." + hero.name + " > .hp").html(hero.hp);
+            $("." + enemy.name + " > .hp").html(enemy.hp);
+            text.html(upCase(hero.name) + ' has dealt ' + hero.playerAtk + ' dmg to ' + upCase(enemy.name) + '<br>'
+            + upCase(enemy.name) +' has dealt ' + enemy.maxAtk+ ' dmg to ' + upCase(hero.name));
+          }
+          else if (hero.hp <= 0){
+            $('#player').empty();
+            text.html(upCase(enemy.name) + ' defeated the ' + upCase(hero.name) + '. You Lost!<br>Click button below to play again!');
+            atkBtn.hide();
+            playBtn.show();
+          }
+          else if (enemy.hp <= 0){
+            $("." + hero.name + " > .hp").html(hero.hp);
+            $('#enemy').empty();
+            text.html(upCase(hero.name) + ' defeated the ' + upCase(enemy.name) + '. <br>Select a new enemy!');
+            enemy = undefined;
+          }
+          if(count === 0 && enemy === undefined){
+            text.text(upCase(hero.name) + ' wins! Click button below to play again!');
+            atkBtn.hide();
+            playBtn.show();
+          }
+          $('#combat-text').html(text);
+        }
+
+
+        // Hero object creator function
+        function createChar(name,hp,maxAtk){
+          this.hp = hp;
+          this.maxAtk = maxAtk;
+          this.name = name;
+          this.playerAtk = Math.floor(this.maxAtk/2);
+          this.increaseAtk = this.playerAtk;
+
+          this.takeDamage = function(dmg){
+            this.hp -= dmg;
+          }
+        };
+
+        function upCase(string) {
+          return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function redBorderEnemies(){
+          console.log("here");
+          for (var i = 0; i < count; i++){
+            $('#charEl').children().eq(i).addClass("redBorder");
+          }
+        }
+
+        function addHpContent(){
+          for (var obj in char){
+            $("." + obj + " > .hp").text(char[obj].hp);
+          }
+        }
+
+      });
+    </script>
+  </body>
+</html>
